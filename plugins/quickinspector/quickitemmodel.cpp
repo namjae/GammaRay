@@ -74,7 +74,7 @@ QVariant QuickItemModel::data(const QModelIndex &index, int role) const
   if (role == QuickItemModelRole::ItemFlags) {
     return m_itemFlags[item];
   }
-  if (role == QuickItemModelRole::SourceFileRole) {
+  if (role == ObjectModel::SourceFileRole) {
     QQmlData *objectData = QQmlData::get(item);
     if (!objectData) {
       return QVariant();
@@ -97,7 +97,7 @@ QVariant QuickItemModel::data(const QModelIndex &index, int role) const
             : context->url.toString(); // same as above
 #endif
   }
-  if (role == QuickItemModelRole::SourceLineRole) {
+  if (role == ObjectModel::SourceLineRole) {
     QQmlData *objectData = QQmlData::get(item);
     if (!objectData) {
       return QVariant();
@@ -105,7 +105,7 @@ QVariant QuickItemModel::data(const QModelIndex &index, int role) const
 
     return objectData->lineNumber;
   }
-  if (role == QuickItemModelRole::SourceColumnRole) {
+  if (role == ObjectModel::SourceColumnRole) {
     QQmlData *objectData = QQmlData::get(item);
     if (!objectData) {
       return QVariant();
@@ -159,9 +159,9 @@ QMap<int, QVariant> QuickItemModel::itemData(const QModelIndex &index) const
 {
   QMap<int, QVariant> d = QAbstractItemModel::itemData(index);
   d.insert(QuickItemModelRole::ItemFlags, data(index, QuickItemModelRole::ItemFlags));
-  d.insert(QuickItemModelRole::SourceFileRole, data(index, QuickItemModelRole::SourceFileRole));
-  d.insert(QuickItemModelRole::SourceLineRole, data(index, QuickItemModelRole::SourceLineRole));
-  d.insert(QuickItemModelRole::SourceColumnRole, data(index, QuickItemModelRole::SourceColumnRole));
+  d.insert(ObjectModel::SourceFileRole, data(index, ObjectModel::SourceFileRole));
+  d.insert(ObjectModel::SourceLineRole, data(index, ObjectModel::SourceLineRole));
+  d.insert(ObjectModel::SourceColumnRole, data(index, ObjectModel::SourceColumnRole));
   d.insert(QuickItemModelRole::ItemActions, data(index, QuickItemModelRole::ItemActions));
   return d;
 }

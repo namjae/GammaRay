@@ -1,5 +1,8 @@
 set(gammaray_srcs
   ${CMAKE_SOURCE_DIR}/3rdparty/qt/resourcemodel.cpp
+  ${CMAKE_SOURCE_DIR}/3rdparty/backtrace-utils/backtrace.cpp
+  ${CMAKE_SOURCE_DIR}/3rdparty/backtrace-utils/backtracecache.cpp
+  ${CMAKE_SOURCE_DIR}/3rdparty/backtrace-utils/procmaps.cpp
 
   aggregatedpropertymodel.cpp
   metaobject.cpp
@@ -136,6 +139,8 @@ else()
     LINK_PRIVATE ${QT_QTNETWORK_LIBRARIES}
   )
 endif()
+
+target_link_libraries(gammaray_core LINK_PRIVATE unwind)
 
 install(TARGETS gammaray_core EXPORT GammaRayTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 

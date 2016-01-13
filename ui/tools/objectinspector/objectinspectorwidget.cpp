@@ -35,11 +35,13 @@
 #include <ui/contextmenuextension.h>
 #include <ui/deferredresizemodesetter.h>
 #include <ui/searchlinecontroller.h>
+#include <ui/uiintegration.h>
 
 #include <QLineEdit>
 #include <QMenu>
 #include <QItemSelectionModel>
 #include <QTimer>
+#include <QMenu>
 
 using namespace GammaRay;
 
@@ -64,6 +66,9 @@ ObjectInspectorWidget::ObjectInspectorWidget(QWidget *parent)
   ui->objectTreeView->setSelectionModel(selectionModel);
   connect(selectionModel, SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
           this, SLOT(objectSelectionChanged(QItemSelection)));
+
+  connect(ui->objectTreeView, SIGNAL(customContextMenuRequested(QPoint)),
+          this, SLOT(itemContextMenu(QPoint)));
 
   if (qgetenv("GAMMARAY_TEST_FILTER") == "1") {
     QMetaObject::invokeMethod(ui->objectSearchLine, "setText",
@@ -98,5 +103,31 @@ void ObjectInspectorWidget::objectContextMenuRequested(const QPoint& pos)
   ContextMenuExtension ext(objectId);
   ext.populateMenu(&menu);
 
-  menu.exec(ui->objectTreeView->viewport()->mapToGlobal(pos));
+//  menu.exec(ui->objectTreeView->viewport()->mapToGlobal(posi));
+
+  if (UiIntegration::instance()) {
+    const auto sourceFile = index.data(ObjectModel::SourceFileRole).toString();
+//   if (sourceFile.isEmpty())
+//     return;
+
+    QAction *action = menu.addAction(tr("Show Code: %1:%2:%3").arg(sourceFile,
+            index.data(ObjectModel::SourceLineRole).toString(),
+            index.data(ObjectModel::SourceColumnRole).toString()));
+    action->setData(ObjectInspectorWidget::NavigateToCode);
+
+    if (QAction *action = menu.exec(ui->objectTreeView->viewport()->mapToGlobal(pos))) {
+        UiIntegration *integ = 0;
+        switch (action->data().toInt()) {
+        case ObjectInspectorWidget::NavigateToCode:
+            integ = UiIntegration::instance();
+            emit integ->navigateToCode(sourceFile,
+                                       index.data(ObjectModel::SourceLineRole).toInt(),
+                                       index.data(ObjectModel::SourceColumnRole).toInt());
+            break;
+        }
+    }
+    menu
+  }
+
 }
+
