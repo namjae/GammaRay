@@ -1,8 +1,5 @@
 set(gammaray_srcs
   ${CMAKE_SOURCE_DIR}/3rdparty/qt/resourcemodel.cpp
-  ${CMAKE_SOURCE_DIR}/3rdparty/backtrace-utils/backtrace.cpp
-  ${CMAKE_SOURCE_DIR}/3rdparty/backtrace-utils/backtracecache.cpp
-  ${CMAKE_SOURCE_DIR}/3rdparty/backtrace-utils/procmaps.cpp
 
   aggregatedpropertymodel.cpp
   metaobject.cpp
@@ -121,6 +118,9 @@ add_definitions(-DMAKE_GAMMARAY_CORE_LIB)
 add_library(gammaray_core SHARED
   ${gammaray_srcs}
 )
+set(BACKWARD_DEFINITIONS "BACKWARD_HAS_UNWIND=1;BACKWARD_HAS_BACKTRACE=0;BACKWARD_HAS_BACKTRACE_SYMBOL=0;BACKWARD_HAS_DW=1;BACKWARD_HAS_BFD=0")
+set(BACKWARD_LIBRARIES "/usr/lib64/libdw.so")
+add_backward(gammaray_core)
 
 target_link_libraries(gammaray_core
   LINK_PUBLIC gammaray_common

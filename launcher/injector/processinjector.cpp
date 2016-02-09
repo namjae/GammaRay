@@ -77,7 +77,7 @@ bool ProcessInjector::launchProcess(const QStringList& programAndArgs, const QPr
     QStringList newArgs;
     newArgs << QStringLiteral("gdb");
 #ifndef Q_OS_MAC
-    newArgs << QStringLiteral("--eval-command") << QStringLiteral("run");
+//     newArgs << QStringLiteral("--eval-command") << QStringLiteral("run");
 #endif
     newArgs << QStringLiteral("--args");
     newArgs += args;

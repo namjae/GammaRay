@@ -548,8 +548,12 @@ include_directories(
   ${CMAKE_BINARY_DIR}
 )
 
+set(STACK_DETAILS_AUTO_DETECT TRUE)
+set(BACKWARD_TESTS OFF)
+
 add_subdirectory(cmake)
 add_subdirectory(3rdparty/kde)
+add_subdirectory(3rdparty/backward-cpp)
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(probe)

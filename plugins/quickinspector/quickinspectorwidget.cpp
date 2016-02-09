@@ -202,13 +202,9 @@ void GammaRay::QuickInspectorWidget::itemContextMenu(const QPoint& pos)
     return;
   }
 
-  const auto sourceFile = index.data(ObjectModel::SourceFileRole).toString();
-  if (sourceFile.isEmpty())
-    return;
-
   QMenu contextMenu;
 
-  const auto sourceFile = index.data(QuickItemModelRole::SourceFileRole).toString();
+  const auto sourceFile = index.data(ObjectModel::SourceFileRole).toString();
   if (!sourceFile.isEmpty() && UiIntegration::instance()) {
     QAction *action = contextMenu.addAction(tr("Show Code: %1:%2:%3").
       arg(sourceFile,

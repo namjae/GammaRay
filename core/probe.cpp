@@ -41,7 +41,6 @@
 #include "util.h"
 
 #include <3rdparty/qt/modeltest.h>
-#include <3rdparty/backtrace-utils/backtrace.h>
 
 #include "remote/server.h"
 #include "remote/remotemodelserver.h"
@@ -608,6 +607,11 @@ void Probe::objectAdded(QObject *obj, bool fromCtor)
   } else {
     instance()->objectFullyConstructed(obj);
   }
+
+
+  instance()->m_constructionBacktracesForObjects[obj].load_here(32);
+  instance()->objectCreationSourceLocation(obj);
+
 }
 
 // pre-conditions: lock may or may not be held already, our thread
@@ -685,11 +689,6 @@ void Probe::objectFullyConstructed(QObject *obj)
   }
 
   m_toolModel->objectAdded(obj);
-
-  BacktraceUtils::Backtrace *bt = new BacktraceUtils::Backtrace();
-  bt->generate();
-  m_backtraceCache.addBacktrace(bt);
-  m_constructionBacktracesForObjects.insert(obj, bt);
 
   emit objectCreated(obj);
 }
@@ -1014,4 +1013,32 @@ void Probe::executeSignalCallback(const Func &func)
   std::for_each(instance()->m_signalSpyCallbacks.constBegin(),
                 instance()->m_signalSpyCallbacks.constEnd(),
                 func);
+}
+
+#if BACKWARD_HAS_DW != 1
+#error "HAS_DW should be defined!" BACKWARD_HAS_DW
+#endif
+
+Probe::SourceLocation Probe::objectCreationSourceLocation(QObject* object)
+{
+  backward::StackTrace &st = m_constructionBacktracesForObjects[object];
+  m_traceResolver.load_stacktrace(st);
+  const QMetaObject *metaObject = object->metaObject();
+  std::cout << metaObject->className();
+  int distanceToQObject = 0;
+  while (metaObject != &QObject::staticMetaObject) {
+    distanceToQObject++;
+    metaObject = metaObject->superClass();
+  }
+  std::cout << " - Distance: " << distanceToQObject << std::endl;
+  for (size_t i = 0; i < 10; ++i) {
+      backward::ResolvedTrace trace = m_traceResolver.resolve(st[i]);
+      std::cout << "#" << i
+          << " " << trace.object_function
+          << " " << trace.source.filename
+          << ":" << trace.source.line
+          << ":" << trace.source.col
+      << std::endl;
+  }
+  return {"",0,0};
 }

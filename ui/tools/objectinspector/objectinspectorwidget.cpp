@@ -103,31 +103,6 @@ void ObjectInspectorWidget::objectContextMenuRequested(const QPoint& pos)
   ContextMenuExtension ext(objectId);
   ext.populateMenu(&menu);
 
-//  menu.exec(ui->objectTreeView->viewport()->mapToGlobal(posi));
-
-  if (UiIntegration::instance()) {
-    const auto sourceFile = index.data(ObjectModel::SourceFileRole).toString();
-//   if (sourceFile.isEmpty())
-//     return;
-
-    QAction *action = menu.addAction(tr("Show Code: %1:%2:%3").arg(sourceFile,
-            index.data(ObjectModel::SourceLineRole).toString(),
-            index.data(ObjectModel::SourceColumnRole).toString()));
-    action->setData(ObjectInspectorWidget::NavigateToCode);
-
-    if (QAction *action = menu.exec(ui->objectTreeView->viewport()->mapToGlobal(pos))) {
-        UiIntegration *integ = 0;
-        switch (action->data().toInt()) {
-        case ObjectInspectorWidget::NavigateToCode:
-            integ = UiIntegration::instance();
-            emit integ->navigateToCode(sourceFile,
-                                       index.data(ObjectModel::SourceLineRole).toInt(),
-                                       index.data(ObjectModel::SourceColumnRole).toInt());
-            break;
-        }
-    }
-    menu
-  }
-
+  menu.exec(ui->objectTreeView->viewport()->mapToGlobal(pos));
 }
 
