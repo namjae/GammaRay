@@ -47,42 +47,35 @@ void ContextMenuExtension::populateMenu(QMenu *menu)
     return;
 
   auto probeController = ObjectBroker::object<ProbeControllerInterface*>();
-  probeController->requestSupportedTools(m_id);
+  probeController->requestObjectInfo(m_id);
 
   // delay adding actions until we know the supported tools
-  connect(probeController, &ProbeControllerInterface::supportedToolsResponse,
-          menu, [menu](ObjectId id, const ToolInfos &toolInfos) {
-    foreach (const auto &toolInfo, toolInfos) {
+  connect(probeController, &ProbeControllerInterface::objectInfoResponse,
+          menu, [menu](ObjectId id, const ObjectInfo &info) {
+    foreach (const auto &toolInfo, info.supportedTools) {
       auto action = menu->addAction(QObject::tr("Show in \"%1\" tool").arg(toolInfo.name));
       QObject::connect(action, &QAction::triggered, [id, toolInfo]() {
         auto probeController = ObjectBroker::object<ProbeControllerInterface*>();
         probeController->selectObject(id, toolInfo.id);
       });
     }
+
+
+
+    if (UiIntegration::instance() && !info.locationOfInstantiation.filePath.isEmpty()) {
+      auto action = menu->addAction(QObject::tr("Show Code: %1:%2:%3")
+            .arg(info.locationOfInstantiation.filePath)
+            .arg(info.locationOfInstantiation.lineNumber)
+            .arg(info.locationOfInstantiation.columnNumber));
+      QObject::connect(action, &QAction::triggered, [id, info]() {
+        UiIntegration *integ = 0;
+            integ = UiIntegration::instance();
+            emit integ->navigateToCode(info.locationOfInstantiation.filePath,
+                                       info.locationOfInstantiation.lineNumber,
+                                       info.locationOfInstantiation.columnNumber);
+      });
+
+    }
   });
 #endif
-
-
-//   if (UiIntegration::instance()) {
-//     const auto sourceFile = index.data(ObjectModel::SourceFileRole).toString();
-// //   if (sourceFile.isEmpty())
-// //     return;
-//
-//     QAction *action = menu->addAction(tr("Show Code: %1:%2:%3").arg(sourceFile,
-//             index.data(ObjectModel::SourceLineRole).toString(),
-//             index.data(ObjectModel::SourceColumnRole).toString()));
-//     action->setData(ObjectInspectorWidget::NavigateToCode);
-//
-//     if (QAction *action = menu.exec(ui->objectTreeView->viewport()->mapToGlobal(pos))) {
-//         UiIntegration *integ = 0;
-//         switch (action->data().toInt()) {
-//         case ObjectInspectorWidget::NavigateToCode:
-//             integ = UiIntegration::instance();
-//             emit integ->navigateToCode(sourceFile,
-//                                        index.data(ObjectModel::SourceLineRole).toInt(),
-//                                        index.data(ObjectModel::SourceColumnRole).toInt());
-//             break;
-//         }
-//     }
-//   }
 }

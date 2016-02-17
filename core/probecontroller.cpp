@@ -61,7 +61,7 @@ void ProbeController::selectObject(ObjectId id, const QString &toolId)
   }
 }
 
-void ProbeController::requestSupportedTools(ObjectId id)
+void ProbeController::requestObjectInfo(ObjectId id)
 {
   QModelIndexList indexes;
   switch (id.type()) {
@@ -81,7 +81,7 @@ void ProbeController::requestSupportedTools(ObjectId id)
     break;
   }
 
-  ToolInfos toolInfos;
+  QVector<ToolInfo> toolInfos;
   toolInfos.reserve(indexes.size());
   foreach (const auto &index, indexes) {
     ToolInfo info;
@@ -89,7 +89,13 @@ void ProbeController::requestSupportedTools(ObjectId id)
     info.name =  index.data(Qt::DisplayRole).toString();
     toolInfos.push_back(info);
   }
-  emit supportedToolsResponse(id, toolInfos);
+
+  SourceLocation loc;
+  if (ObjectId::QObjectType) {
+    loc = Probe::instance()->objectCreationSourceLocation(id.asQObject());
+  }
+
+  emit objectInfoResponse(id, ObjectInfo(toolInfos, loc));
 }
 
 void ProbeController::detachProbe()

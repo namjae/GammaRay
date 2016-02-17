@@ -43,9 +43,9 @@ void ProbeControllerClient::selectObject(ObjectId id, const QString &toolId)
                                      QVariantList() << QVariant::fromValue(id) << toolId);
 }
 
-void ProbeControllerClient::requestSupportedTools(ObjectId id)
+void ProbeControllerClient::requestObjectInfo(ObjectId id)
 {
-  Endpoint::instance()->invokeObject(objectName(), "requestSupportedTools",
+  Endpoint::instance()->invokeObject(objectName(), "requestObjectInfo",
                                      QVariantList() << QVariant::fromValue(id));
 }
 

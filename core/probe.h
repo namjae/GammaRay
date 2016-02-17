@@ -33,6 +33,8 @@
 #include "probeinterface.h"
 #include "signalspycallbackset.h"
 
+#include <common/objectinfo.h>
+
 #pragma push_macro("signals")
 #undef signals
 #include <3rdparty/backward-cpp/backward.hpp>
@@ -92,8 +94,6 @@ class GAMMARAY_CORE_EXPORT Probe : public QObject, public ProbeInterface
     void selectObject(void* object, const QString& typeName) Q_DECL_OVERRIDE;
     void registerSignalSpyCallbackSet(const SignalSpyCallbackSet& callbacks) Q_DECL_OVERRIDE;
 
-
-    struct SourceLocation { QString filePath; int lineNumber, columnNumber; };
     SourceLocation objectCreationSourceLocation(QObject *object);
 
     QObject *window() const;

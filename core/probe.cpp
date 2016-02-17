@@ -609,9 +609,9 @@ void Probe::objectAdded(QObject *obj, bool fromCtor)
   }
 
 
-  instance()->m_constructionBacktracesForObjects[obj].load_here(32);
-  instance()->objectCreationSourceLocation(obj);
-
+  if (fromCtor) {
+    instance()->m_constructionBacktracesForObjects[obj].load_here(32);
+  }
 }
 
 // pre-conditions: lock may or may not be held already, our thread
@@ -1019,8 +1019,11 @@ void Probe::executeSignalCallback(const Func &func)
 #error "HAS_DW should be defined!" BACKWARD_HAS_DW
 #endif
 
-Probe::SourceLocation Probe::objectCreationSourceLocation(QObject* object)
+SourceLocation Probe::objectCreationSourceLocation(QObject* object)
 {
+  if (!m_constructionBacktracesForObjects.contains(object)) {
+    return {"", (uint)-1, (uint)-1};
+  }
   backward::StackTrace &st = m_constructionBacktracesForObjects[object];
   m_traceResolver.load_stacktrace(st);
   const QMetaObject *metaObject = object->metaObject();
@@ -1031,7 +1034,7 @@ Probe::SourceLocation Probe::objectCreationSourceLocation(QObject* object)
     metaObject = metaObject->superClass();
   }
   std::cout << " - Distance: " << distanceToQObject << std::endl;
-  for (size_t i = 0; i < 10; ++i) {
+  for (size_t i = 4; i < (uint)6 + distanceToQObject; ++i) {
       backward::ResolvedTrace trace = m_traceResolver.resolve(st[i]);
       std::cout << "#" << i
           << " " << trace.object_function
@@ -1040,5 +1043,8 @@ Probe::SourceLocation Probe::objectCreationSourceLocation(QObject* object)
           << ":" << trace.source.col
       << std::endl;
   }
-  return {"",0,0};
+  std::cout.flush();
+//   return {"",0,0};
+  backward::ResolvedTrace trace = m_traceResolver.resolve(st[4 + distanceToQObject + 1]);
+  return { QString::fromStdString(trace.source.filename), trace.source.line, trace.source.col };
 }

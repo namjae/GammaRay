@@ -35,10 +35,8 @@ ProbeControllerInterface::ProbeControllerInterface(QObject *parent)
 {
   qRegisterMetaType<ObjectId>();
   qRegisterMetaTypeStreamOperators<ObjectId>();
-  qRegisterMetaType<ToolInfo>();
-  qRegisterMetaTypeStreamOperators<ToolInfo>();
-  qRegisterMetaType<ToolInfos>();
-  qRegisterMetaTypeStreamOperators<ToolInfos>();
+  qRegisterMetaType<ObjectInfo>();
+  qRegisterMetaTypeStreamOperators<ObjectInfo>();
 }
 
 ProbeControllerInterface::~ProbeControllerInterface()

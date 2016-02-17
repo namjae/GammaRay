@@ -67,9 +67,6 @@ ObjectInspectorWidget::ObjectInspectorWidget(QWidget *parent)
   connect(selectionModel, SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
           this, SLOT(objectSelectionChanged(QItemSelection)));
 
-  connect(ui->objectTreeView, SIGNAL(customContextMenuRequested(QPoint)),
-          this, SLOT(itemContextMenu(QPoint)));
-
   if (qgetenv("GAMMARAY_TEST_FILTER") == "1") {
     QMetaObject::invokeMethod(ui->objectSearchLine, "setText",
                               Qt::QueuedConnection,
