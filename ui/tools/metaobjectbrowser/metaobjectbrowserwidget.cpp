@@ -27,13 +27,17 @@
 */
 
 #include "metaobjectbrowserwidget.h"
+#include "metaobjectbrowserclient.h"
 #include "propertywidget.h"
+
 #include <ui/deferredresizemodesetter.h>
 #include <ui/deferredtreeviewconfiguration.h>
 #include <ui/searchlinecontroller.h>
 
 #include <common/objectbroker.h>
+#include <common/tools/metaobjectbrowser/metaobjectbrowserinterface.h>
 
+#include <QAction>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -42,9 +46,17 @@
 
 using namespace GammaRay;
 
+static QObject *createMetaObjectBrowserClientHandler(const QString &/*name*/, QObject *parent)
+{
+  return new MetaObjectBrowserClient(parent);
+}
+
 MetaObjectBrowserWidget::MetaObjectBrowserWidget(QWidget *parent)
   : QWidget(parent)
 {
+  ObjectBroker::registerClientObjectFactoryCallback<MetaObjectBrowserInterface*>(createMetaObjectBrowserClientHandler);
+
+
   QAbstractItemModel *model = ObjectBroker::model(QStringLiteral("com.kdab.GammaRay.MetaObjectBrowserTreeModel"));
 
   m_treeView = new QTreeView(this);
@@ -77,6 +89,11 @@ MetaObjectBrowserWidget::MetaObjectBrowserWidget(QWidget *parent)
   // init widget
   new DeferredTreeViewConfiguration(m_treeView);
   m_treeView->sortByColumn(0, Qt::AscendingOrder);
+
+  auto iface = ObjectBroker::object<MetaObjectBrowserInterface*>();
+  auto action = new QAction(tr("Scan for issues..."), this);
+  connect(action, SIGNAL(triggered()), iface, SLOT(scanForIssues()));
+  addAction(action);
 }
 
 void MetaObjectBrowserWidget::selectionChanged(const QItemSelection& selection)

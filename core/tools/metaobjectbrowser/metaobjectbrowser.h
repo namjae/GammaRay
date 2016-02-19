@@ -31,19 +31,29 @@
 
 #include "toolfactory.h"
 
+#include <common/tools/metaobjectbrowser/metaobjectbrowserinterface.h>
+
 class QAbstractProxyModel;
 class QItemSelection;
+class QModelIndex;
 
 namespace GammaRay {
 
 class PropertyController;
 
-class MetaObjectBrowser : public QObject
+class MetaObjectBrowser : public MetaObjectBrowserInterface
 {
   Q_OBJECT
+  Q_INTERFACES(GammaRay::MetaObjectBrowserInterface)
 
   public:
     explicit MetaObjectBrowser(ProbeInterface *probe, QObject *parent = 0);
+
+    void scanForIssues() Q_DECL_OVERRIDE;
+
+  private:
+    void scanForIssues(const QModelIndex &index);
+    void scanForIssues(const QMetaObject *mo);
 
   private Q_SLOTS:
     void objectSelected(const QItemSelection &selection);

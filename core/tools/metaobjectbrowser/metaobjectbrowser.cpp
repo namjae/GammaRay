@@ -38,11 +38,12 @@
 
 #include <QDebug>
 #include <QItemSelectionModel>
+#include <QMetaProperty>
 
 using namespace GammaRay;
 
 MetaObjectBrowser::MetaObjectBrowser(ProbeInterface *probe, QObject *parent)
-    : QObject(parent)
+    : MetaObjectBrowserInterface(parent)
     , m_propertyController(new PropertyController(QStringLiteral("com.kdab.GammaRay.MetaObjectBrowser"), this))
 {
   m_model = new ServerProxyModel<KRecursiveFilterProxyModel>(this);
@@ -82,6 +83,49 @@ void MetaObjectBrowser::objectSelected(QObject *obj)
     if (indexes.isEmpty())
         return;
     ObjectBroker::selectionModel(m_model)->select(indexes.first(), QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+}
+
+void MetaObjectBrowser::scanForIssues()
+{
+    scanForIssues(QModelIndex());
+}
+
+void MetaObjectBrowser::scanForIssues(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        auto mo = index.data(MetaObjectTreeModel::MetaObjectRole).value<const QMetaObject*>();
+        scanForIssues(mo);
+    }
+
+    for (int i = 0; i < Probe::instance()->metaObjectModel()->rowCount(index); ++i) {
+        const auto childIdx = Probe::instance()->metaObjectModel()->index(i, 0, index);
+        if (childIdx.isValid())
+            scanForIssues(childIdx);
+    }
+}
+
+void MetaObjectBrowser::scanForIssues(const QMetaObject* mo)
+{
+    // TODO output results in a form the client can see...
+    Q_ASSERT(mo);
+    if (!mo->superClass())
+        return;
+
+    for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
+        const auto prop = mo->property(i);
+
+        const auto baseIdx = mo->superClass()->indexOfProperty(prop.name());
+        if (baseIdx >= 0)
+            qDebug() << mo->className() << prop.name() << "property override";
+    }
+
+    for (int i = mo->methodOffset(); i < mo->methodCount(); ++i) {
+        const auto method = mo->method(i);
+
+        const auto baseIdx = mo->superClass()->indexOfMethod(method.methodSignature());
+        if (baseIdx >= 0)
+            qDebug() << mo->className() << method.methodSignature() << "method override";
+    }
 }
 
 QString MetaObjectBrowserFactory::name() const

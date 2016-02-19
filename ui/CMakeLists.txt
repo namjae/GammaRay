@@ -38,6 +38,7 @@ set(gammaray_ui_srcs
   tools/messagehandler/messagehandlerwidget.cpp
   tools/messagehandler/messagehandlerclient.cpp
   tools/metaobjectbrowser/metaobjectbrowserwidget.cpp
+  tools/metaobjectbrowser/metaobjectbrowserclient.cpp
   tools/metatypebrowser/metatypebrowserwidget.cpp
   tools/mimetypes/mimetypeswidget.cpp
   tools/modelinspector/modelinspectorwidget.cpp

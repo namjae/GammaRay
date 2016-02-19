@@ -227,8 +227,12 @@ void MetaObjectTreeModel::objectAdded(QObject *obj)
     // for now we just move up to the first known static parent meta object, and work with that
     while (metaObject && !isKnownMetaObject(metaObject))
       metaObject = metaObject->superClass();
-    if (!metaObject) // the QML engines actually manages to hit this case, with QObject-ified gadgets...
+    if (!metaObject) { // the QML engines actually manages to hit this case, with QObject-ified gadgets...
+      qDebug() << "Dangling meta object:" << obj->metaObject()->className();
       return;
+    } else {
+      qDebug() << "Collapsing dynamic meta object: " << obj->metaObject()->className() << "to" << metaObject->className();
+    }
   }
 
   addMetaObject(metaObject);
